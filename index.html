@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าโปรไฟล์นักศึกษา</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #036630;
+        }
+        .main-content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .main-content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .sidebar-item-active {
+            background-color: #d1d5db;
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                display: block !important;
+            }
+        }
+        /* Custom styling for the grade chart */
+        .grade-bar {
+            height: 1.5rem;
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -0.25rem;
+            right: -0.25rem;
+            min-width: 1rem;
+            height: 1rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            border-radius: 9999px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="flex flex-col md:flex-row min-h-screen">
+
+        <!-- Mobile Header & Hamburger Menu -->
+        <header class="bg-white shadow-md p-4 flex justify-between items-center md:hidden">
+            <h1 class="text-xl font-bold text-gray-900">โปรไฟล์นักศึกษา</h1>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75c0-4.026-3.245-7.272-7.27-7.272S3.454 5.724 3.454 9.75a8.967 8.967 0 011.082 2.768M12 18h.008v.008H12zM12 21a9 9 0 100-18 9 9 0 000 18z" />
+                    </svg>
+                    <span id="mobile-notification-badge" class="notification-badge bg-red-500 text-white"></span>
+                </div>
+                <button id="hamburger-menu" class="p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out bg-white w-64 p-6 shadow-xl z-20">
+            <h2 class="text-2xl font-bold mb-8 text-gray-900">เมนู</h2>
+            <nav>
+                <ul>
+                    <li id="menu-profile" class="sidebar-item p-4 mb-2 rounded-lg cursor-pointer flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-200 sidebar-item-active">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                        <span class="text-lg font-medium">ข้อมูลส่วนตัว</span>
+                    </li>
+                    <li id="menu-academic" class="sidebar-item p-4 mb-2 rounded-lg cursor-pointer flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span class="text-lg font-medium">ผลการเรียน</span>
+                    </li>
+                    <li id="menu-payments" class="sidebar-item p-4 mb-2 rounded-lg cursor-pointer flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l-.879-.659c-1.171-.879-3.072-.879-4.243 0-1.172.879-1.172 2.303 0 3.182l5.44 4.08a-2.25 2.25 0 010 3.182l-5.44 4.08c-1.171.879-1.171 2.303 0 3.182.879.659 2.303.659 3.182 0l.879-.659m3-2.818l-.879-.659c-1.171-.879-3.072-.879-4.243 0-1.172.879-1.172 2.303 0 3.182l5.44 4.08c-1.171.879-1.171 2.303 0 3.182.879.659 2.303.659 3.182 0l.879-.659" />
+                        </svg>
+                        <span class="text-lg font-medium">การชำระเงิน</span>
+                    </li>
+                    <li id="menu-activities" class="sidebar-item p-4 mb-2 rounded-lg cursor-pointer flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21l2.5-2.5-5.83-5.83a2.25 2.25 0 01-.54-2.22l2.3-2.3a.5.5 0 00-.22-.22l-2.3-2.3a2.25 2.25 0 01-2.22-.54L3 11.42a2.25 2.25 0 01-.54-2.22l-2.3-2.3a.5.5 0 00-.22-.22L1.8 4.25a.75.75 0 011.06 1.06l1.22 1.22a2.25 2.25 0 012.22.54l5.83 5.83a2.25 2.25 0 01.54 2.22z" />
+                        </svg>
+                        <span class="text-lg font-medium">กิจกรรม</span>
+                    </li>
+                    <li id="menu-settings" class="sidebar-item p-4 mb-2 rounded-lg cursor-pointer flex items-center space-x-3 transition-colors duration-200 hover:bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-lg font-medium">ตั้งค่า</span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-8 md:p-12 transition-all duration-300">
+            <header class="hidden md:flex justify-between items-center mb-10">
+                <h1 class="text-3xl font-bold text-gray-900">โปรไฟล์นักศึกษา</h1>
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8 text-gray-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75c0-4.026-3.245-7.272-7.27-7.272S3.454 5.724 3.454 9.75a8.967 8.967 0 011.082 2.768M12 18h.008v.008H12zM12 21a9 9 0 100-18 9 9 0 000 18z" />
+                    </svg>
+                    <span id="desktop-notification-badge" class="notification-badge bg-red-500 text-white"></span>
+                </div>
+            </header>
+
+            <!-- Personal Profile Section -->
+            <section id="section-profile" class="main-content-section active bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">ข้อมูลส่วนตัว</h2>
+                <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+                    <div class="flex-shrink-0">
+                        <img id="profile-picture" class="w-32 h-32 rounded-full object-cover shadow-md" src="https://placehold.co/128x128/9CA3AF/FFFFFF?text=รูปภาพ" alt="รูปโปรไฟล์">
+                    </div>
+                    <div class="flex-1 w-full md:w-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">ชื่อ - นามสกุล</label>
+                                <p id="profile-name" class="text-lg font-semibold text-gray-900">ตัวอย่าง ชื่อ-นามสกุล</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">วันเกิด</label>
+                                <p id="profile-dob" class="text-lg font-semibold text-gray-900">01 มกราคม 2545</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">อีเมล</label>
+                                <p id="profile-email" class="text-lg font-semibold text-gray-900">student.example@uni.ac.th</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">เบอร์โทรศัพท์</label>
+                                <p id="profile-phone" class="text-lg font-semibold text-gray-900">081-123-4567</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-sm font-medium text-gray-500">ที่อยู่</label>
+                                <p id="profile-address" class="text-lg font-semibold text-gray-900">123 ถนนตัวอย่าง แขวง/ตำบลตัวอย่าง เขต/อำเภอตัวอย่าง จังหวัดตัวอย่าง 12345</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-sm font-medium text-gray-500">สถานะการรับแจ้งเตือน</label>
+                                <p id="profile-notifications" class="text-lg font-semibold text-gray-900">เปิดใช้งาน (SMS และ อีเมล)</p>
+                            </div>
+                        </div>
+                        <button class="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                            แก้ไขโปรไฟล์
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic Information Section -->
+            <section id="section-academic" class="main-content-section bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">ผลการเรียน</h2>
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4">ผลการเรียนรวม</h3>
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex justify-between items-center text-lg font-medium">
+                            <span>GPAX:</span>
+                            <span id="gpax">3.85</span>
+                        </div>
+                        <div class="relative w-full bg-gray-200 rounded-full h-4">
+                            <div id="gpax-bar" class="bg-blue-500 h-4 rounded-full" style="width: 96.25%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold mb-4">เกรดรายวิชา</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">รหัสวิชา</th>
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">ชื่อวิชา</th>
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">หน่วยกิต</th>
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">เกรด</th>
+                                </tr>
+                            </thead>
+                            <tbody id="academic-table-body">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Fee Payments Section -->
+            <section id="section-payments" class="main-content-section bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">การชำระเงินค่าเล่าเรียน</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg shadow-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="py-3 px-4 text-left font-semibold text-gray-600">รายการ</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-600">จำนวนเงิน</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-600">สถานะ</th>
+                                <th class="py-3 px-4 text-left font-semibold text-gray-600">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Extra-Curricular Activities Section -->
+            <section id="section-activities" class="main-content-section bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">กิจกรรมเสริมหลักสูตร</h2>
+                <div id="activities-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Data will be populated by JavaScript -->
+                </div>
+            </section>
+            
+            <!-- Settings Section -->
+            <section id="section-settings" class="main-content-section bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">การตั้งค่า</h2>
+                <p class="text-gray-600">ในส่วนนี้จะมีการตั้งค่าบัญชี, การแจ้งเตือน และความปลอดภัย</p>
+                <div class="mt-6 space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">เปิดใช้งานการแจ้งเตือนทางอีเมล</span>
+                        <label class="switch relative inline-block w-12 h-6">
+                            <input type="checkbox" id="email-notifications-toggle" checked class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-full transition-colors duration-300 before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:rounded-full before:transition-transform duration-300"></span>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <span class="font-medium text-gray-700">เปิดใช้งานการเข้าสู่ระบบแบบสองชั้น (2FA)</span>
+                        <label class="switch relative inline-block w-12 h-6">
+                            <input type="checkbox" id="two-factor-toggle" class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-full transition-colors duration-300 before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:rounded-full before:transition-transform duration-300"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Dummy data for the profile sections
+            const studentData = {
+                profile: {
+                    name: "ฮุน เซน",
+                    dob: " 5 สิงหาคม พ.ศ. 2495",
+                    email: "อุ๋งอิ๋ง รัก ฮุนเซน",
+                    phone: "ติดต่อผ่านธูป",
+                    address: "しひみら えつ のつむ",
+                    notifications: "F16 กริฟเพน",
+                    picture: "https://upload.wikimedia.org/wikipedia/commons/4/46/Hun_Sen_July_2019.jpg"
+                },
+                academic: [
+                    { subject: "การเขียนโปรแกรมเชิงวัตถุ", credits: 3, grade: "F" },
+                    { subject: "โครงสร้างข้อมูลและอัลกอริทึม", credits: 3, grade: "F+" },
+                    { subject: "เครือข่ายคอมพิวเตอร์", credits: 3, grade: "F" },
+                    { subject: "ฐานข้อมูลขั้นสูง", credits: 3, grade: "F" },
+                    { subject: "ภาษาอังกฤษเพื่อการสื่อสาร", credits: 3, grade: "F" }
+                ],
+                payments: [
+                    { item: "ค่าเทอม ภาคเรียนที่ 1/2567", amount: "25,000.00 บาท", status: "ชำระแล้ว" },
+                    { item: "ค่าเทอม ภาคเรียนที่ 2/2567", amount: "25,000.00 บาท", status: "ยังไม่ชำระ" },
+                    { item: "ค่าหอพัก (เทอม 1/2567)", amount: "8,000.00 บาท", status: "ชำระแล้ว" }
+                ],
+                activities: [
+                    { name: "ชมรมหุ่นยนต์", desc: "กิจกรรมเกี่ยวกับการออกแบบและสร้างหุ่นยนต์เพื่อการแข่งขัน", button: "ดูรายละเอียด" },
+                    { name: "โครงการอาสาสมัคร", desc: "สอนหนังสือให้กับเด็กประถมในชุมชนห่างไกล", button: "ดูรายละเอียด" },
+                    { name: "ชมรมดนตรีสากล", desc: "ซ้อมดนตรีและจัดแสดงคอนเสิร์ตในงานสำคัญของมหาวิทยาลัย", button: "ดูรายละเอียด" }
+                ],
+                notifications: 2 // Number of new notifications
+            };
+
+            // Selectors
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerMenu = document.getElementById('hamburger-menu');
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.main-content-section');
+            const notificationBadges = document.querySelectorAll('.notification-badge');
+
+            // Function to render profile data
+            const renderProfile = () => {
+                document.getElementById('profile-picture').src = studentData.profile.picture;
+                document.getElementById('profile-name').innerText = studentData.profile.name;
+                document.getElementById('profile-dob').innerText = studentData.profile.dob;
+                document.getElementById('profile-email').innerText = studentData.profile.email;
+                document.getElementById('profile-phone').innerText = studentData.profile.phone;
+                document.getElementById('profile-address').innerText = studentData.profile.address;
+                document.getElementById('profile-notifications').innerText = studentData.profile.notifications;
+            };
+
+            // Function to render academic data
+            const renderAcademic = () => {
+                const tableBody = document.getElementById('academic-table-body');
+                tableBody.innerHTML = ''; // Clear old data
+                studentData.academic.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.classList.add('border-b', 'border-gray-100');
+                    row.innerHTML = `
+                        <td class="py-3 px-4 text-gray-800 font-semibold">${item.subject.slice(0, 3).toUpperCase()}${Math.floor(Math.random() * 1000)}</td>
+                        <td class="py-3 px-4">${item.subject}</td>
+                        <td class="py-3 px-4">${item.credits}</td>
+                        <td class="py-3 px-4 font-semibold text-center">${item.grade}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            };
+
+            // Function to render payments data
+            const renderPayments = () => {
+                const tableBody = document.getElementById('payments-table-body');
+                tableBody.innerHTML = ''; // Clear old data
+                studentData.payments.forEach(item => {
+                    const isPaid = item.status === 'ชำระแล้ว';
+                    const statusClass = isPaid ? 'bg-green-500' : 'bg-red-500';
+                    const buttonText = isPaid ? 'ดูใบเสร็จ' : 'ชำระเงิน';
+                    const buttonClass = isPaid ? 'bg-gray-400 hover:bg-gray-500' : 'bg-green-600 hover:bg-green-700';
+
+                    const row = document.createElement('tr');
+                    row.classList.add('border-b', 'border-gray-100');
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${item.item}</td>
+                        <td class="py-3 px-4">${item.amount}</td>
+                        <td class="py-3 px-4">
+                            <span class="text-white px-2 py-1 text-xs font-bold rounded-full ${statusClass}">${item.status}</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button class="px-4 py-2 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 ${buttonClass}">${buttonText}</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            };
+
+            // Function to render activities data
+            const renderActivities = () => {
+                const activitiesList = document.getElementById('activities-list');
+                activitiesList.innerHTML = ''; // Clear old data
+                studentData.activities.forEach(item => {
+                    const activityCard = document.createElement('div');
+                    activityCard.classList.add('bg-gray-50', 'rounded-xl', 'p-6', 'shadow-sm', 'border', 'border-gray-200');
+                    activityCard.innerHTML = `
+                        <h3 class="text-xl font-bold text-gray-900">${item.name}</h3>
+                        <p class="text-gray-600 my-2">${item.desc}</p>
+                        <button class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 mt-4">${item.button}</button>
+                    `;
+                    activitiesList.appendChild(activityCard);
+                });
+            };
+
+            // Function to update notification badge
+            const updateNotificationBadge = () => {
+                notificationBadges.forEach(badge => {
+                    if (studentData.notifications > 0) {
+                        badge.innerText = studentData.notifications;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                });
+            };
+
+            // Function to switch content sections
+            const switchSection = (sectionId) => {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+            };
+
+            // Function to handle menu clicks
+            const handleMenuClick = (event) => {
+                const menuItem = event.currentTarget;
+                const sectionId = `section-${menuItem.id.split('-')[1]}`;
+                switchSection(sectionId);
+
+                // Update active state in sidebar
+                sidebarItems.forEach(item => {
+                    item.classList.remove('sidebar-item-active');
+                });
+                menuItem.classList.add('sidebar-item-active');
+
+                // Close sidebar on mobile after click
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            };
+
+            // Event listeners
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', handleMenuClick);
+            });
+
+            hamburgerMenu.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            // Initial render
+            renderProfile();
+            renderAcademic();
+            renderPayments();
+            renderActivities();
+            updateNotificationBadge();
+            
+            // Initial content display
+            switchSection('section-profile');
+
+        });
+    </script>
+</body>
+</html>
